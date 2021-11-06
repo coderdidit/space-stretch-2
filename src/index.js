@@ -94,13 +94,38 @@ const handlePoseToGameEvents = (pose) => {
     }
     const shouldersAndElbowsVissible = shouldersVisible && visibleShoulders == 2
 
+    // new moves
+    const noseX = nose.x
+    const leftElbowX = leftElbow.score >= scoreThreshold ? leftElbow.x : Number.MAX_SAFE_INTEGER
+    const rightElbowX = rightElbow.score >= scoreThreshold ? rightElbow.x : Number.MAX_SAFE_INTEGER
+
+    const leftElbowY = leftElbow.score >= scoreThreshold ? leftElbow.y : Number.MAX_SAFE_INTEGER
+    const rightElbowY = rightElbow.score >= scoreThreshold ? rightElbow.y : Number.MAX_SAFE_INTEGER
+
+    const noseLElbowXDiff = leftElbowX - noseX
+    const noseRElbowXDiff = rightElbowX - noseX
+
+    const noseLElbowYDiff = nose.y - leftElbowY
+    const noseRElbowYDiff = nose.y - rightElbowY
+
+    if (noseLElbowYDiff < 0 && noseLElbowXDiff < 170) {
+        return left;
+    }
+
+    if (noseRElbowYDiff < 0 && noseRElbowXDiff < 170) {
+        return right;
+    }
+
+    console.log('noseLElbowXDiff, noseRElbowXDiff',
+        noseLElbowXDiff, noseRElbowXDiff)
+
     const moveSideActivationDist = 8
     if (noseVissible && lEVissible
         && noseToLeftEyeYdistance < moveSideActivationDist) {
-        return left;
+        return stop;
     } else if (noseVissible && REVissible
         && noseToRightEyeYdistance < moveSideActivationDist) {
-        return right;
+        return stop;
     } else if (shouldersAndElbowsVissible && bothArmsUp) {
         movedUp = true
         return up;
@@ -111,7 +136,7 @@ const handlePoseToGameEvents = (pose) => {
 }
 
 // fps for predictions
-let fps = 8;
+let fps = 20;
 let then = Date.now();
 let now, delta;
 let interval = 1000 / fps;
