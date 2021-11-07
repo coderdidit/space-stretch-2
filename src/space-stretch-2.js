@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import hotDogPath from './vendor/assets/images/hotdog.png'
 import shipPath from './vendor/assets/images/car90.png'
 import bgPath from './vendor/assets/images/concrete2.jpeg'
+import {up, left, right, stop} from './game-state'
 
 
 const playerNgSpeed = 30
@@ -72,6 +73,9 @@ class SpaceStretch2Game extends Phaser.Scene {
             this.score += 1
             this.scoreBoard.setText(`SCORE: ${this.score}`)
         }
+
+        this.moveChangeTS = Date.now()
+        this.prevMove = stop
     }
 
     update(time, delta) {
@@ -83,14 +87,34 @@ class SpaceStretch2Game extends Phaser.Scene {
         this.player.body.setVelocity(0, 0);
         this.player.body.setAcceleration(0)
 
+        const now = Date.now()
+        let curMove = this.prevMove
         if (window.gameUpMove() || this.cursors.up.isDown) {
             const ng = this.player.angle
             const vec = this.physics.velocityFromAngle(ng, playerSpeed)
             this.player.body.setVelocity(vec.x, vec.y);
+            curMove = up
         } else if (window.gameLeftMove() || this.cursors.left.isDown) {
             this.player.body.setAngularVelocity(playerNgSpeed * -1);
+            curMove = left
         } else if (window.gameRightMove() || this.cursors.right.isDown) {
             this.player.body.setAngularVelocity(playerNgSpeed);
+            curMove = right
+        } else {
+            curMove = stop
+        }
+        if (curMove != this.prevMove) {
+            this.moveChangeTS = Date.now()
+        }
+        const diff = (now - this.moveChangeTS) / 1000
+        console.log('diff', diff)
+
+        if (diff > 5 && curMove != stop) {
+            this.prevMove = stop
+            this.moveChangeTS = Date.now()
+            alert(`5 seconds passed on `)
+        } else {
+            this.prevMove = curMove
         }
     }
 }
